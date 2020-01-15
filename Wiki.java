@@ -18,6 +18,8 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+// FIXES were made by A625093 in January 2020 to get this thing running...
+
 package org.wikipedia;
 
 import java.io.*;
@@ -1243,7 +1245,7 @@ public class Wiki implements Comparable<Wiki>
         Map<String, Object> postparams = new HashMap<>();
         postparams.put("lgname", username);
         postparams.put("lgpassword", new String(password));
-        postparams.put("lgtoken", getToken("login"));
+        postparams.put("lgtoken", getToken2020(username, password));
         String line = makeHTTPRequest(apiUrl, getparams, postparams, "login");
         Arrays.fill(password, '0');
 
@@ -1553,6 +1555,21 @@ public class Wiki implements Comparable<Wiki>
         getparams.put("type", type);
         String content = makeHTTPRequest(query, getparams, null, "getToken");
         return parseAttribute(content, type + "token", 0);
+    }
+    
+    // fixed by A625093
+    // solution based on https://github.com/MediaWiki-Bot/MediaWiki-Bot/issues/83 
+    // official maintained bot version now compiles towards Java 11 => not suitable
+    public String getToken2020(String username, char[] password) throws IOException
+    {
+        Map<String, String> getparams = new HashMap<>();
+        getparams.put("action", "login");
+        Map<String, Object> postparams = new HashMap<>();
+        postparams.put("lgname", username);
+        postparams.put("lgpassword", new String(password));
+        
+        String content = makeHTTPRequest(query, getparams, postparams, "getToken2020");
+        return parseAttribute(content, "token", 0);
     }
 
     // PAGE METHODS
